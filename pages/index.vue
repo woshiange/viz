@@ -1,6 +1,9 @@
 <template>
-  <v-file-input v-model="file"
-  ></v-file-input>
+  <div>
+    <p>hello serbe</p>
+    <v-file-input v-model="file"
+    ></v-file-input>
+  </div>
 </template>
 
 <script>
