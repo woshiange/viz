@@ -1,14 +1,28 @@
 <template>
-  <div
-    class="grid-stack-item"
-    v-bind="gridStackAttributes"
-  >
-    <div class="grid-stack-item-content">
-      <iframe ref="iframe" scrolling="yes" style="position: relative; height: 100%; width: 100%; background-color:white;"></iframe>
-      <div v-if="edit" id="transp">
-      </div>
+  <v-hover v-slot="{ hover }">
+    <div
+      v-bind="gridStackAttributes"
+    >
+        <div
+          v-if="hover"
+          class="serbe"
+        >
+          <v-icon
+            large
+            color="grey darken-2"
+            @click="deleteCell"
+          >
+            mdi-delete
+          </v-icon>
+        </div>
+        <div
+          class="grid-stack-item-content"
+        >
+            <iframe ref="iframe" scrolling="yes" style="height: 100%; width: 100%; background-color:white;"></iframe>
+          <div v-if="edit" class="cell-mask"></div>
+        </div>
     </div>
-  </div>
+  </v-hover>
 </template>
 <script>
 export default {
@@ -31,6 +45,11 @@ export default {
       }
     }
   },
+  methods: {
+    deleteCell () {
+      this.$emit('delete-cell', this.cell)
+    }
+  },
   mounted() {
     const iframeEl = this.$refs.iframe
     const myIframe = iframeEl.contentWindow.document
@@ -50,7 +69,15 @@ export default {
   align-items: center;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
-#transp {
+.serbe {
+  position: absolute;
+  background-color: white;
+  right: 20px;
+  top: -10px;
+  z-index: 1;
+  border: 3px solid grey;
+}
+.cell-mask {
     position:absolute;
     left:0;
     top:0;

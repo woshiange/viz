@@ -1,12 +1,49 @@
 <template>
   <div>
+    <v-icon
+      large
+      color="grey darken-2"
+      @click.stop="drawerTrash = !drawerTrash"
+    >
+      mdi-delete
+    </v-icon>
+    <v-navigation-drawer
+      v-model="drawerTrash"
+      :width="500"
+      absolute
+      bottom
+      temporary
+    >
+      <v-list
+        nav
+        dense
+      >
+        <v-list-item-group
+          v-model="group"
+          active-class="deep-grey--text text--accent-4"
+        >
+          <trash-item
+            v-for="cell in trash"
+            :cell="cell"
+            :key="cell.id"
+            @restore-cell="restoreCell"
+          />
+        </v-list-item-group>
+      </v-list>
+    </v-navigation-drawer>
     <download :cells="cells"/>
     <v-switch
       v-model="edit"
       :label="`Edit: ${edit.toString()}`"
     ></v-switch>
       <section class="grid-stack">
-        <cell v-for="cell in cells" :cell="cell" :key="cell.id" :edit="edit" />
+          <cell
+            v-for="cell in cells"
+            :cell="cell"
+            :key="cell.id"
+            :edit="edit"
+            @delete-cell="deleteCell"
+          />
       </section>
   </div>
 </template>
@@ -25,7 +62,10 @@ export default {
     return {
       edit: true,
       grid: null,
-      cells: []
+      cells: [],
+      trash: [],
+      drawerTrash: false,
+      group: null
     }
   },
   watch: {
@@ -37,11 +77,14 @@ export default {
         this.grid.enableMove(false)
         this.grid.enableResize(false)
       }
+    },
+    group () {
+      this.drawerTrash = false
     }
   },
   methods: {
     addCell(cellData, cellType) {
-      let index = this.cells.length;
+      let index = this.cells.length
       const lastCellLayout = index == 0 ?
         {
           x: 0,
@@ -79,16 +122,34 @@ export default {
         cellType,
         layout
       }
-      this.cells.push(cell);
+      this.cells.push(cell)
       this.$nextTick(() => {
-        this.grid.makeWidget(`#${cell.id}`);
-      });
+        this.grid.makeWidget(`#${cell.id}`)
+      })
     },
     runXpath(path, doc) {
       return doc.evaluate(path, doc, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
     },
     getElementByXpath(path, doc) {
       return doc.evaluate(path, doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+    },
+    deleteCell (cell) {
+      this.cells = this.cells.filter(x => {
+        return x.id != cell.id
+      })
+      this.grid.removeWidget(`#${cell.id}`)
+      this.trash.push(cell)
+    },
+    restoreCell (cell) {
+      cell.layout.x = 0
+      cell.layout.y = this.gridLastRow
+      this.cells.push(cell)
+      this.$nextTick(() => {
+        this.grid.makeWidget(`#${cell.id}`)
+      })
+      this.trash = this.trash.filter(x => {
+        return x.id != cell.id
+      })
     },
     async update() {
       const fileContent = this.$route.params.fileContent
@@ -164,10 +225,20 @@ export default {
       return domCell
     }
   },
+  computed: {
+    gridLastRow () {
+      var gridLastRow = 0
+      for(var i = 0; i < this.cells.length; i++) {
+        var temp = this.cells[i].layout.y + this.cells[i].layout.height
+        gridLastRow = temp > gridLastRow ? temp : gridLastRow
+      }
+      return gridLastRow
+    }
+  },
   mounted() {
     this.grid = GridStack.init({
       acceptWidgets: true,
-      float: true,
+      float: false,
       cellHeight: '70px',
       minRow: 1
     })
