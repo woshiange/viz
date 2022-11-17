@@ -2,36 +2,51 @@
   <v-app>
     <v-system-bar
       app
-      height="100"
-      color="blue darken-1"
+      height="50"
+      color="blue"
     >
+      <v-spacer></v-spacer>
       <v-icon
         color="white"
       >
         mdi-pencil
       </v-icon>
-      <span style="color:white;">You're editing this presentation.</span>
+      <span style="color:white; font-weight: bold;">
+        You're editing this presentation.
+      </span>
+      <download :cells="cells" class="ml-2"/>
       <v-spacer></v-spacer>
-      <download :cells="cells"/>
     </v-system-bar>
 
     <v-app-bar
+      v-if="trash.length > 0"
+      class="d-flex justify-end"
       app
       fixed
       flat
       clipped-right
     >
-      <v-icon
-        large
-        color="grey darken-2"
-        @click.stop="drawerTrash = !drawerTrash"
-      >
-        mdi-delete
-      </v-icon>
+      <v-tooltip right>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            large
+            color="grey darken-2"
+            @click.stop="drawerTrash = !drawerTrash"
+            style="margin-right: 250px;"
+            v-bind="attrs"
+            v-on="on"
+          >
+            mdi-delete
+          </v-icon>
+        </template>
+        <span v-if="drawerTrash">Close the trash</span>
+        <span v-else>Open the trash</span>
+      </v-tooltip>
     </v-app-bar>
 
     <v-navigation-drawer
       v-model="drawerTrash"
+      :width="500"
       app
       clipped
       right
@@ -41,7 +56,6 @@
         dense
       >
         <v-list-item-group
-          v-model="group"
           active-class="deep-grey--text text--accent-4"
         >
           <trash-item
@@ -55,7 +69,7 @@
     </v-navigation-drawer>
 
     <v-main class="ma-0 pa-0">
-        <section class="grid-stack">
+        <section class="grid-stack dashboard">
           <cell
             v-for="cell in cells"
             :cell="cell"
@@ -85,8 +99,7 @@ export default {
       grid: null,
       cells: [],
       trash: [],
-      drawerTrash: false,
-      group: null
+      drawerTrash: false
     }
   },
   watch: {
@@ -99,8 +112,10 @@ export default {
         this.grid.enableResize(false)
       }
     },
-    group () {
-      this.drawerTrash = false
+    trash () {
+      if(this.trash.length == 0) {
+        this.drawerTrash = false
+      }
     }
   },
   methods: {
@@ -272,3 +287,9 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.dashboard {
+  background-color: #f9fbfc;
+}
+</style>
