@@ -18,7 +18,7 @@
         <div
           class="grid-stack-item-content"
         >
-            <iframe ref="iframe" scrolling="yes" style="height: 100%; width: 100%; background-color:white;"></iframe>
+            <iframe ref="iframe" scrolling="yes" style="height: 100%; width: 100%; background-color:white;" class="iframe-cell"></iframe>
           <div v-if="edit" class="cell-mask"></div>
         </div>
     </div>
@@ -60,29 +60,28 @@ export default {
 </script>
 
 <style>
-.grid-stack-item {
-  margin: 10px;
-}
 .grid-stack-item-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  border: solid 2px;
 }
 .serbe {
   position: absolute;
   background-color: white;
-  right: 20px;
+  right: 35px;
   top: -10px;
   z-index: 1;
   border: 3px solid grey;
 }
+.iframe-cell {
+  border:0
+}
 .cell-mask {
-    position:absolute;
-    left:0;
-    top:0;
-    background: rgba(255,255,255,.5);
-    width:100%;
-    height:100%;
+  position:absolute;
+  left:0;
+  top:0;
+  background: rgba(255,255,255,.1);
+  width:100%;
+  height:100%;
+  cursor: move;
 }
 </style>

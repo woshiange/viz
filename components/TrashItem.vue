@@ -13,7 +13,7 @@
         mdi-arrow-down-right
       </v-icon>
     </div>
-    <iframe ref="iframe" scrolling="yes" style="height: 100%; width: 100%; background-color:white;"></iframe>
+    <iframe ref="iframe" scrolling="yes" class="trash-item" style="height: 100%; width: 100%; background-color:white;"></iframe>
     <div class="trash-cell-mask"></div>
   </v-list-item>
 </template>
@@ -55,5 +55,10 @@ export default {
     background: rgba(255,255,255,0);
     width:100%;
     height:100%;
+}
+.trash-item {
+  border-radius: 10px;
+  border: 2px;
+  border-style: solid;
 }
 </style>
