@@ -6,12 +6,19 @@
     <div
       class="serbe"
     >
-      <v-icon
-        color="grey darken-2"
-        @click="restoreCell"
-      >
-        mdi-arrow-down-right
-      </v-icon>
+      <v-tooltip left>
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon
+            color="grey darken-2"
+            @click="restoreCell"
+            v-bind="attrs"
+            v-on="on"
+          >
+            mdi-arrow-down-right
+          </v-icon>
+        </template>
+        <span>Restore</span>
+      </v-tooltip>
     </div>
     <iframe ref="iframe" scrolling="yes" class="trash-item" style="height: 100%; width: 100%; background-color:white;"></iframe>
     <div class="trash-cell-mask"></div>

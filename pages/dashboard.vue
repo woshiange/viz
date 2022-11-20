@@ -68,8 +68,8 @@
       </v-list>
     </v-navigation-drawer>
 
-    <v-main class="ma-0 pa-0">
-        <section class="grid-stack dashboard">
+    <v-main class="ma-0 pa-4">
+        <section class="grid-stack" ref="dashboard" :style="gridStyles">
           <cell
             v-for="cell in cells"
             :cell="cell"
@@ -99,7 +99,10 @@ export default {
       grid: null,
       cells: [],
       trash: [],
-      drawerTrash: false
+      drawerTrash: false,
+      sizeObserver: null,
+      cellWidthUnitPx: null,
+      gridStyles: {}
     }
   },
   watch: {
@@ -116,6 +119,9 @@ export default {
       if(this.trash.length == 0) {
         this.drawerTrash = false
       }
+    },
+    cellWidthUnitPx () {
+      this.setGridCss()
     }
   },
   methods: {
@@ -215,7 +221,6 @@ export default {
         }
         this.addCell(cellData, cellType)
       }
-
     },
     extractEchartOption (echart) {
       const dom = new DOMParser().parseFromString(echart.outerHTML, 'text/html')
@@ -259,6 +264,23 @@ export default {
         el.remove()
       })
       return domCell
+    },
+    onResize () {
+      if(!(this.edit)) {
+        return
+      }
+      if(this.grid.engine.length === 0) {
+        return
+      }
+      const firstCell = this.grid.engine.nodes[0]
+      this.cellWidthUnitPx = firstCell.el.offsetWidth/firstCell.w
+    },
+    setGridCss () {
+      this.gridStyles = {
+        background: '#efefef',
+        'background-image': 'linear-gradient(#ffffff .4rem, transparent .4rem), linear-gradient(90deg, #ffffff .4rem, transparent .4rem)',
+        'background-size': `${this.cellWidthUnitPx}px 70px`
+      }
     }
   },
   computed: {
@@ -277,19 +299,25 @@ export default {
       float: false,
       cellHeight: '70px',
       minRow: 1,
-      margin: '5px',
+      margin: '0px',
       resizable: {
         handles: 'e,se,s,sw,w,nw,n,ne'
       }
     })
     window.grid = this.grid;
     this.update()
+    this.grid.printCount()
+    this.sizeObserver = new ResizeObserver(this.onResize)
+    this.sizeObserver.observe(this.$refs.dashboard)
+  },
+  beforeDestroy () {
+    this.sizeObserver.unobserve(this.$refs.dashboard)
   }
 }
 </script>
 
-<style scoped>
-.dashboard {
-  background-color: #f9fbfc;
-}
+<style>
+.grid-stack {
+  width: 100%;
+}  
 </style>

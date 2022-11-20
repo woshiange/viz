@@ -7,13 +7,22 @@
           v-if="hover"
           class="serbe"
         >
-          <v-icon
-            large
-            color="grey darken-2"
-            @click="deleteCell"
-          >
-            mdi-delete
-          </v-icon>
+        <v-tooltip left>
+          <template v-slot:activator="{ on, attrs }">
+            <v-icon
+              large
+              color="grey darken-2"
+              @click="deleteCell"
+              v-bind="attrs"
+              v-on="on"
+            >
+              mdi-delete
+            </v-icon>
+          </template>
+          <span>Delete</span>
+        </v-tooltip>
+
+
         </div>
         <div
           class="grid-stack-item-content"
@@ -59,10 +68,11 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .grid-stack-item-content {
   border-radius: 10px;
-  border: solid 2px;
+  padding: 3px 3px 3px 3px;
+  box-shadow: 0px 1px 3px rgb(0 0 0 / 13%);
 }
 .serbe {
   position: absolute;

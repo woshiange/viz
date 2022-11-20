@@ -1,6 +1,10 @@
 <template>
   <v-btn
     @click="download()"
+    small
+    color="grey lighten-5"
+    elevation="0"
+    class="blue--text"
   >
     Download
   </v-btn>
@@ -26,21 +30,25 @@ export default {
     <link rel="stylesheet" href="https://gridstackjs.com/node_modules/gridstack/dist/gridstack.min.css"/>
     <script src="https://gridstackjs.com/node_modules/gridstack/dist/gridstack-all.js"><\/script>
 <style>
-.grid-stack-item {
-  margin: 10px;
+#app {
+  background-color: #f9fbfc;
+}
+#dashboard {
+  margin: 25px 25px 10px 25px;
 }
 .grid-stack-item-content {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border-radius: 10px;
+  box-shadow: 0px 1px 3px rgb(0 0 0 / 13%);
+}
+.iframe-cell {
+  border:0
 }
 </style>
   </head>
   <body>
     <main id="app">
       <div id="dashboard" class="h-screen w-screen flex flex-col items-center bg-gray-100 p-10">
-        <div class="grid-stack h-full w-full">
+        <section class="grid-stack h-full w-full">
   
           <div
             v-for="cell in cellsGridstack"
@@ -48,11 +56,11 @@ export default {
             v-bind="cell"
           >
             <div class="grid-stack-item-content">
-              <iframe ref="cells" scrolling="yes" style="position: relative; height: 100%; width: 100%; background-color:white;"></iframe>
+              <iframe class="iframe-cell" ref="cells" scrolling="yes" style="position: relative; height: 100%; width: 100%; background-color:white;"></iframe>
             </div>
           </div>
 
-        </div>
+        </section>
       </div>
     </main>
     <script type="module">
@@ -84,9 +92,10 @@ export default {
         mounted: function () {
           this.grid = GridStack.init({
             acceptWidgets: true,
-            float: true,
+            float: false,
             cellHeight: '70px',
-            minRow: 1
+            minRow: 1,
+            margin: '5px',
           })
           this.cells.forEach((cell, index) => {
             const iframeEl = this.$refs.cells[index]

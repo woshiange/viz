@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-main>
-      <v-container fluid style="background-color: #f9fbfc">
+      <v-container fluid style="background-color: #f9fbfc" class="pa-0">
         <Nuxt />
       </v-container>
     </v-main>

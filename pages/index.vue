@@ -1,7 +1,9 @@
 <template>
-  <div class="main">
+  <v-container fluid class="main d-flex flex-column pa-0" style="height: 100vh;">
+    <h1 class="d-flex justify-center mt-15">Jupyter Notebook Converter</h1>
+    <p class="d-flex justify-center">Turn your notebook into a beautiful presentation.</p>
     <div
-      class="dropzone-container"
+      class="dropzone-container d-flex mt-5"
       @dragover="dragover"
       @dragleave="dragleave"
       @drop="drop"
@@ -17,14 +19,16 @@
       />
 
       <label for="fileInput" class="file-label">
-        <div v-if="isDragging">Release to drop files here.</div>
-        <div v-else>Drop files here or <u>click here</u> to upload.</div>
+        <div class="d-flex justify-center">
+          <div v-if="isDragging">Release to drop files here.</div>
+          <div v-else><u>Drop your notebook here or click to upload.</u></div>
+        </div>
       </label>
     </div>
-  </div>
+  </v-container>
 </template>
 
-<script>
+<script scoped>
 export default {
   data() {
     return {
@@ -74,19 +78,13 @@ export default {
 </script>
 
 <style scoped>
-.main {
-    display: flex;
-    flex-grow: 1;
-    align-items: center;
-    height: 100vh;
-    justify-content: center;
-    text-align: center;
-}
-
 .dropzone-container {
     padding: 4rem;
     background: #f7fafc;
     border: 1px solid #e2e8f0;
+    margin: 0 auto;
+    width: 50%;
+    background-color: ##C5CAE9;
 }
 
 .hidden-input {
@@ -101,25 +99,7 @@ export default {
     font-size: 20px;
     display: block;
     cursor: pointer;
-}
-
-.preview-container {
-    display: flex;
-    margin-top: 2rem;
-}
-
-.preview-card {
-    display: flex;
-    border: 1px solid #a2a2a2;
-    padding: 5px;
-    margin-left: 5px;
-}
-
-.preview-img {
-    width: 50px;
-    height: 50px;
-    border-radius: 5px;
-    border: 1px solid #a2a2a2;
-    background-color: #a2a2a2;
+    margin: 0 auto;
+    width: 100%;
 }
 </style>
