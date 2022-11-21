@@ -62,7 +62,7 @@ export default {
   mounted() {
     const iframeEl = this.$refs.iframe
     const myIframe = iframeEl.contentWindow.document
-    myIframe.write(this.cell.cellData.documentElement.outerHTML)
+    myIframe.write(this.cell.iframeContent.documentElement.outerHTML)
     myIframe.close()
   }
 }

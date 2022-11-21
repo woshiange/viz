@@ -15,7 +15,7 @@
         class="hidden-input"
         @change="onChange"
         ref="file"
-        accept=".html"
+        accept=".ipynb"
       />
 
       <label for="fileInput" class="file-label">
@@ -56,12 +56,22 @@ export default {
       this.onChange();
       this.isDragging = false;
     },
+    async getNotebookHtml (notebookIpynb) {
+      const response = await this.$axios.$post(
+        'https://asia-southeast2-wyzauto.cloudfunctions.net/etl-convert_notebook_to_html',
+        { notebookSource: notebookIpynb }
+      )
+      return response
+    }
   },
   watch: {
     file() {
       const reader = new FileReader()
       reader.onload = () => {
-        this.fileContent = reader.result
+        this.getNotebookHtml(reader.result)
+          .then((res) => {
+            this.fileContent = res
+          })
       }
       reader.readAsText(this.file)
     },
