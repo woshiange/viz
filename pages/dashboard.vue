@@ -14,7 +14,7 @@
       <span style="color:white; font-weight: bold;">
         You're editing this presentation.
       </span>
-      <download :cells="cells" class="ml-2"/>
+      <download :cells="cells" :fileContent="fileContent" class="ml-2"/>
       <v-spacer></v-spacer>
     </v-system-bar>
 
@@ -98,6 +98,7 @@ export default {
     return {
       edit: true,
       grid: null,
+      fileContent: null,
       cells: [],
       trash: [],
       drawerTrash: false,
@@ -189,8 +190,8 @@ export default {
       })
     },
     async update() {
-      const fileContent = this.$route.params.fileContent
-      const dom = new DOMParser().parseFromString(fileContent, 'text/html')
+      this.fileContent = this.$route.params.fileContent
+      const dom = new DOMParser().parseFromString(this.fileContent, 'text/html')
       new Notebook(dom).cells.forEach(cell => {
         this.addCell(cell)
       })
