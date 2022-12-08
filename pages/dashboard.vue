@@ -235,7 +235,7 @@ export default {
       float: false,
       cellHeight: '70px',
       minRow: 1,
-      margin: '0px',
+      margin: '3px',
       resizable: {
         handles: 'e,se,s,sw,w,nw,n,ne'
       }

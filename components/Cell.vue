@@ -5,7 +5,7 @@
     >
         <div
           v-if="hover"
-          class="serbe"
+          class="trash-tooltip"
         >
         <v-tooltip left>
           <template v-slot:activator="{ on, attrs }">
@@ -74,7 +74,7 @@ export default {
   padding: 3px 3px 3px 3px;
   box-shadow: 0px 1px 3px rgb(0 0 0 / 13%);
 }
-.serbe {
+.trash-tooltip {
   position: absolute;
   background-color: white;
   right: 35px;

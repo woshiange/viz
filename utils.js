@@ -183,6 +183,17 @@ function createTemplate(cells, nodesGridstack, notebookHtml) {
     width:100%;
     height:100%;
 }
+.grid-stack-item-content {
+  border-radius: 10px;
+  padding: 3px 3px 3px 3px;
+  box-shadow: 0px 1px 3px rgb(0 0 0 / 13%);
+}
+iframe {
+  border: 0px;
+  height: 100%;
+  width: 100%;
+  background-color: white;
+}
 </style>
 </head>
 
@@ -208,6 +219,7 @@ function createTemplate(cells, nodesGridstack, notebookHtml) {
           color="grey lighten-5"
           elevation="0"
           class="blue--text ml-2 mr-1"
+          @click="cancelEdit"
         >
           Cancel
         </v-btn>
@@ -302,8 +314,12 @@ function createTemplate(cells, nodesGridstack, notebookHtml) {
         <span>Restore</span>
       </v-tooltip>
     </div>
-    <iframe scrolling="yes" class="trash-item" style="height: 100%; width: 100%; background-color:white;"></iframe>
-    <div class="trash-cell-mask"></div>
+    <iframe
+      scrolling="yes"
+      class="trash-item"
+      style="height: 100%; width: 100%; background-color:white;"
+    ></iframe>
+    <div class="trash-cell-mask" @click="restoreCell(trashItem)"></div>
   </v-list-item>
         </v-list-item-group>
       </v-list>
@@ -320,7 +336,7 @@ function createTemplate(cells, nodesGridstack, notebookHtml) {
           >
             <div class="grid-stack-item-content">
                 <v-hover v-slot="{ hover }">
-                  <v-card
+                  <v-sheet
                     height="100%"
                     width="100%"
                   >
@@ -343,9 +359,12 @@ function createTemplate(cells, nodesGridstack, notebookHtml) {
                          <span>Delete</span>
                        </v-tooltip>
                      </div>
-                     <iframe ref="cells" scrolling="yes" style="height: 100%; width: 100%; background-color:white;"></iframe>
+                     <iframe
+                       ref="cells"
+                       scrolling="no"
+                     ></iframe>
                      <div v-if="edit" class="cell-mask"></div>
-                  </v-card>
+                  </v-sheet>
                 </v-hover>
             </div>
           </div>
@@ -490,7 +509,8 @@ class Notebook {
           notebookHtml: '${btoa(encodeURIComponent(notebookHtml))}',
           trash: [],
           drawerTrash: false,
-          edit: false
+          edit: false,
+          dataBeforeEdit: { cells: [], trash: [] }
         },
         computed: {
           cellsGridstack() {
@@ -588,6 +608,32 @@ class Notebook {
       this.trash.push({id: cellArg.id, 'gs-id': cellArg.id, html: html})
       await this.$nextTick()
       this.updateTrashIframe(html)
+    },
+    async cancelEdit () {
+      this.removeAllWidgets()
+      await this.reconstructPreviousWidgets()
+    },
+    removeAllWidgets () {
+      this.grid.engine.nodes.forEach(node => {
+        this.grid.removeWidget(node.el) 
+      })
+    },
+    async reconstructPreviousWidgets () {
+      this.cells.forEach((cell, index) => {
+        cell.id = -1
+        cell['gs-id'] = -1
+        cell.html = ''
+      })
+      const newCells = structuredClone(this.dataBeforeEdit.cells.filter(cell => String(cell.id) !== "-1"))
+      this.cells = [...this.cells, ...newCells]
+      await this.$nextTick()
+      this.cells.forEach((cell, index) => {
+        if(String(cell.id) == "-1") {
+          return
+        }
+        this.grid.makeWidget(document.getElementById(cell.id))
+        this.updateIframe(cell.id, cell.html)
+      })
     }
   },
   watch: {
@@ -595,9 +641,11 @@ class Notebook {
       if(this.edit) {
         this.grid.enableMove(true)
         this.grid.enableResize(true)
+        this.dataBeforeEdit =  { cells: structuredClone(this.cells), trash: structuredClone(this.trash) }
       } else {
         this.grid.enableMove(false)
         this.grid.enableResize(false)
+        this.dataBeforeEdit =  { cells: [], trash: [] }
       }
     },
     trash () {
