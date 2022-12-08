@@ -14,7 +14,12 @@
       <span style="color:white; font-weight: bold;">
         You're editing this presentation.
       </span>
-      <download :cells="cells" :fileContent="fileContent" class="ml-2"/>
+      <download
+        :cells="cells"
+        :fileContent="fileContent"
+        :trash="trash"
+        class="ml-2"
+      />
       <v-spacer></v-spacer>
     </v-system-bar>
 
