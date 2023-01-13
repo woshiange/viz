@@ -612,11 +612,16 @@ class Notebook {
     async cancelEdit () {
       this.removeAllWidgets()
       await this.reconstructPreviousWidgets()
+      this.reconstructPreviousTrash()
     },
     removeAllWidgets () {
       this.grid.engine.nodes.forEach(node => {
         this.grid.removeWidget(node.el) 
       })
+    },
+    reconstructPreviousTrash () {
+      this.trash = structuredClone(this.dataBeforeEdit.trash)
+      console.log(this.trash)
     },
     async reconstructPreviousWidgets () {
       this.cells.forEach((cell, index) => {
