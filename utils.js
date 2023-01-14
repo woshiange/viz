@@ -250,7 +250,7 @@ iframe {
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"><\/script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"><\/script>
-    <script src="http://192.168.193.111:3000/utils.js"><\/script>
+    <script src="https://woshiange.github.io/viz/utils.js"><\/script>
 </body>
 <script>
     new Vue({
@@ -309,7 +309,7 @@ iframe {
       }
     },
     edit() {
-      window.location.href = "http://192.168.193.111:3000"
+      window.location.href = "https://woshiange.github.io/viz"
     }
   },
     })
