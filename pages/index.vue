@@ -15,13 +15,21 @@
         class="hidden-input"
         @change="onChange"
         ref="file"
-        accept=".ipynb"
+        accept=".ipynb, .html"
       />
 
       <label for="fileInput" class="file-label">
         <div class="d-flex justify-center">
           <div v-if="isDragging">Release to drop files here.</div>
-          <div v-else><u>Drop your notebook here or click to upload.</u></div>
+          <div v-else>
+            <div v-if="file === null">
+              <u>Drop your notebook here or click to upload.</u>
+            </div>
+            <div v-else>
+              <v-progress-circular indeterminate></v-progress-circular>
+              <span>{{loaderMessage}}</span>
+            </div>
+          </div>
         </div>
       </label>
     </div>
@@ -35,8 +43,17 @@ export default {
       isDragging: false,
       files: [],
       file: null,
-      fileContent: null
+      fileContent: null,
+      loaderMessage: ''
     };
+  },
+  computed: {
+    fileName() {
+      return this.file.name.split('.')[0]
+    },
+    fileExtension() {
+      return this.file.name.split('.').at(-1).toLowerCase()
+    }
   },
   methods: {
     onChange() {
@@ -56,22 +73,24 @@ export default {
       this.onChange();
       this.isDragging = false;
     },
-    async getNotebookHtml (notebookIpynb) {
+    async convertIpynbTokHtml (notebookIpynb) {
+      this.loaderMessage = 'Converting Ipynb to Html...'
       const response = await this.$axios.$post(
         'https://asia-southeast2-wyzauto.cloudfunctions.net/etl-convert_notebook_to_html',
         { notebookSource: notebookIpynb }
       )
-      return response
+      return this.fileContent = response
     }
   },
   watch: {
     file() {
       const reader = new FileReader()
       reader.onload = () => {
-        this.getNotebookHtml(reader.result)
-          .then((res) => {
-            this.fileContent = res
-          })
+        if(this.fileExtension === 'ipynb') {
+          this.convertIpynbTokHtml(reader.result)
+        } else {
+          this.fileContent = reader.result
+        }
       }
       reader.readAsText(this.file)
     },

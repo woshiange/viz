@@ -11,7 +11,7 @@
 </template>
 
 <script>
-import { createTemplate } from '@/static/utils.js'
+import { createTemplate } from '@/utils.js'
 export default {
   props: {
     cells: {

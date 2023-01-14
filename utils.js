@@ -50,7 +50,8 @@ function extractDefault (defaultEl) {
 }
 
 class Cell {
-  constructor(dom) {
+  constructor(dom, id) {
+    this.id = 'cell' + String(id)
     this.dom = dom
     this.echartsEl = getElementByXpath("//script[contains(text(),'function(echarts)')]/..", this.dom)
     this.markdownEl = getElementByXpath("//div[contains(@class, 'jp-MarkdownOutput')]", this.dom)
@@ -114,29 +115,13 @@ class Notebook {
     const cellsDom = this.dom.querySelectorAll('.jp-Cell');
     for(var i = 0; i < cellsDom.length; i++) {
       var cellDom = new DOMParser().parseFromString(cellsDom[i].outerHTML, 'text/html')
-      result.push(new Cell(cellDom))
+      result.push(new Cell(cellDom, i))
     }
     return result
   }
 }
 
-function importCodeDefinition() {
-  console.log('bbb')
-  console.log('bbb')
-  const objsToImport = [getElementByXpath, extractEcharts, extractPlotly, extractMarkdown, extractDefault, Cell, Notebook]
-  var codeDefinition = ''
-  for(var i = 0; i < objsToImport.length; i++) {
-    codeDefinition += '\n' + objsToImport[i].toString()
-  }
-  // when applied to a class .toString() adds an extra line about babel that we remove
-  codeDefinition = codeDefinition.replace(/^.*_babel_runtime_helpers.*$/mg, "")
-  console.log('aaaaaa')
-  console.log(codeDefinition)
-  return codeDefinition
-}
-
 function createTemplate(cells, nodesGridstack, notebookHtml) {
-      var importedCodeDefinition = importCodeDefinition()
       var cellsOutput = []
       for (const cell of cells) {
         const cellGridstack = nodesGridstack.find(node => node.id === cell.id)
@@ -221,125 +206,17 @@ iframe {
       height="50"
       color="blue"
     >
-      <div v-if="edit">
-        <v-icon
-          color="white"
-        >
-          mdi-pencil
-        </v-icon>
-        <span style="color:white; font-weight: bold;">
-          You're editing this presentation.
-        </span>
         <v-btn
           small
           color="grey lighten-5"
           elevation="0"
           class="blue--text ml-2 mr-1"
-          @click="cancelEdit"
-        >
-          Cancel
-        </v-btn>
-        <v-btn
-          small
-          color="grey lighten-5"
-          elevation="0"
-          class="blue--text ml-1"
-          @click="edit = !edit"
-        >
-          Save
-        </v-btn>
-      </div>
-      <div v-else>
-        <v-btn
-          small
-          color="grey lighten-5"
-          elevation="0"
-          class="blue--text ml-2 mr-1"
-          @click="edit = !edit"
+          @click="edit()"
         >
           Edit
         </v-btn>
-        <v-btn
-          small
-          color="grey lighten-5"
-          elevation="0"
-          class="blue--text ml-1"
-        >
-          Download
-        </v-btn>
-      </div>
     </v-system-bar>
-    <v-app-bar
-      v-if="edit && trash.length > 0"
-      class="d-flex justify-end"
-      app
-      fixed
-      flat
-      clipped-right
-    >
-      <v-tooltip right>
-        <template v-slot:activator="{ on, attrs }">
-          <v-icon
-            large
-            color="grey darken-2"
-            style="margin-right: 250px;"
-            v-bind="attrs"
-            v-on="on"
-            @click="drawerTrash = !drawerTrash"
-          >
-            mdi-delete
-          </v-icon>
-        </template>
-        <span v-if="drawerTrash">Close the trash</span>
-        <span v-else>Open the trash</span>
-      </v-tooltip>
-    </v-app-bar>
 
-    <v-navigation-drawer
-      v-model="drawerTrash"
-      :width="500"
-      app
-      clipped
-      right
-    >
-      <v-list
-        nav
-        dense
-      >
-        <v-list-item-group
-          active-class="deep-grey--text text--accent-4"
-        >
-  <v-list-item
-    class="mt-5"
-    v-for="trashItem in trash"
-  >
-    <div
-      class="trash-restore"
-    >
-      <v-tooltip left>
-        <template v-slot:activator="{ on, attrs }">
-          <v-icon
-            color="grey darken-2"
-            v-bind="attrs"
-            v-on="on"
-            @click="restoreCell(trashItem)"
-          >
-            mdi-undo
-          </v-icon>
-        </template>
-        <span>Restore</span>
-      </v-tooltip>
-    </div>
-    <iframe
-      scrolling="yes"
-      class="trash-item"
-      style="height: 100%; width: 100%; background-color:white;"
-    ></iframe>
-    <div class="trash-cell-mask" @click="restoreCell(trashItem)"></div>
-  </v-list-item>
-        </v-list-item-group>
-      </v-list>
-    </v-navigation-drawer>
             <v-main>
                 <v-container>
 
@@ -356,30 +233,10 @@ iframe {
                     height="100%"
                     width="100%"
                   >
-                     <div
-                       v-if="hover && edit"
-                       class="trash-tooltip"
-                     >
-                       <v-tooltip left>
-                         <template v-slot:activator="{ on, attrs }">
-                           <v-icon
-                             large
-                             color="grey darken-2"
-                             v-bind="attrs"
-                             v-on="on"
-                             @click="deleteCell(cell)"
-                           >
-                             mdi-delete
-                           </v-icon>
-                         </template>
-                         <span>Delete</span>
-                       </v-tooltip>
-                     </div>
                      <iframe
                        ref="cells"
                        scrolling="no"
                      ></iframe>
-                     <div v-if="edit" class="cell-mask"></div>
                   </v-sheet>
                 </v-hover>
             </div>
@@ -393,9 +250,7 @@ iframe {
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"><\/script>
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"><\/script>
-    <script>
-${importedCodeDefinition}
-    <\/script>
+    <script src="http://192.168.193.111:3000/utils.js"><\/script>
 </body>
 <script>
     new Vue({
@@ -407,7 +262,6 @@ ${importedCodeDefinition}
           notebookHtml: '${btoa(encodeURIComponent(notebookHtml))}',
           trash: [],
           drawerTrash: false,
-          edit: false,
           dataBeforeEdit: { cells: [], trash: [] }
         },
         computed: {
@@ -429,59 +283,9 @@ ${importedCodeDefinition}
             minRow: 1,
             margin: '5px',
           })
-          if(!this.edit) {
-            this.grid.enableMove(false)
-            this.grid.enableResize(false)
-          }
           this.populate()
         },
   methods : {
-    async deleteCell (cellArg) {
-      const cellId = cellArg['gs-id']
-      const cellEl = this.grid.engine.nodes.find(
-        x => String(x.id) === String(cellId)
-      ).el
-      this.grid.removeWidget(cellEl) 
-      const cell = this.cells.find(
-        x => String(x.id) === String(cellId)
-      )
-      this.trash.push(cell)
-      await this.$nextTick()
-      this.updateTrashIframe(cell.html)
-    },
-    updateTrashIframe(html) {
-      const trashItemsEl = document.getElementsByClassName("trash-item")
-      const iframeEl = trashItemsEl[trashItemsEl.length - 1]
-      const iframe = iframeEl.contentWindow.document
-      iframe.write(html)
-      iframe.close()
-    },
-    async restoreCell (trashItem) {
-      const cell = {
-        id: trashItem.id,
-        'gs-id': trashItem.id,
-        html: trashItem.html,
-        'gs-auto-position': true
-      }
-      this.cells.push(cell)
-      await this.$nextTick()
-      this.grid.makeWidget(document.getElementById(cell.id))
-      this.trash = this.trash.filter(x => {
-         return x.id != trashItem.id
-       })
-      this.updateIframe(trashItem.id, trashItem.html)
-      this.cells.forEach((cell, index) => {
-        if(index == this.cells.length - 1) {
-          return
-        }
-        if(cell.id != trashItem.id) {
-          return
-        }
-        cell.id = -1
-        cell['gs-id'] = -1
-        cell.html = ''
-          })
-    },
     updateIframe(gsId, html) {
       const iframeEl = document.getElementById(gsId).getElementsByTagName("iframe")[0]
       const iframe = iframeEl.contentWindow.document
@@ -503,60 +307,11 @@ ${importedCodeDefinition}
         this.updateIframe(cellArg.id, html)
         return
       }
-      this.trash.push({id: cellArg.id, 'gs-id': cellArg.id, html: html})
-      await this.$nextTick()
-      this.updateTrashIframe(html)
     },
-    async cancelEdit () {
-      this.removeAllWidgets()
-      await this.reconstructPreviousWidgets()
-      this.reconstructPreviousTrash()
-    },
-    removeAllWidgets () {
-      this.grid.engine.nodes.forEach(node => {
-        this.grid.removeWidget(node.el) 
-      })
-    },
-    reconstructPreviousTrash () {
-      this.trash = structuredClone(this.dataBeforeEdit.trash)
-      console.log(this.trash)
-    },
-    async reconstructPreviousWidgets () {
-      this.cells.forEach((cell, index) => {
-        cell.id = -1
-        cell['gs-id'] = -1
-        cell.html = ''
-      })
-      const newCells = structuredClone(this.dataBeforeEdit.cells.filter(cell => String(cell.id) !== "-1"))
-      this.cells = [...this.cells, ...newCells]
-      await this.$nextTick()
-      this.cells.forEach((cell, index) => {
-        if(String(cell.id) == "-1") {
-          return
-        }
-        this.grid.makeWidget(document.getElementById(cell.id))
-        this.updateIframe(cell.id, cell.html)
-      })
+    edit() {
+      window.location.href = "http://192.168.193.111:3000"
     }
   },
-  watch: {
-    edit() {
-      if(this.edit) {
-        this.grid.enableMove(true)
-        this.grid.enableResize(true)
-        this.dataBeforeEdit =  { cells: structuredClone(this.cells), trash: structuredClone(this.trash) }
-      } else {
-        this.grid.enableMove(false)
-        this.grid.enableResize(false)
-        this.dataBeforeEdit =  { cells: [], trash: [] }
-      }
-    },
-    trash () {
-      if(this.trash.length == 0 && this.drawerTrash) {
-        this.drawerTrash = false
-      }
-    }
-  }
     })
 <\/script>
 
