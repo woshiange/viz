@@ -258,8 +258,10 @@ iframe {
         vuetify: new Vuetify(),
         data: {
           grid: undefined,
+          cellsStart: [],
           cells: ${JSON.stringify(cellsOutput)},
           notebookHtml: '${btoa(encodeURIComponent(notebookHtml))}',
+          notebookId: null,
           trash: [],
           drawerTrash: false,
           dataBeforeEdit: { cells: [], trash: [] }
@@ -283,6 +285,7 @@ iframe {
             minRow: 1,
             margin: '5px',
           })
+          this.cellsStart = JSON.parse(JSON.stringify(this.cells))
           this.populate()
         },
   methods : {
@@ -309,7 +312,26 @@ iframe {
       }
     },
     edit() {
-      window.location.href = "https://woshiange.github.io/viz"
+      this.sendNotebook()
+    },
+    async sendNotebook() {
+      let url = 'https://asia-southeast2-dataviz-374817.cloudfunctions.net/send_notebook'
+      let data = { 'notebookHtml': this.notebookHtml, cells: this.cellsStart }
+      let res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      if (res.ok) {
+        let ret = await res.json()
+        this.notebookId = ret.notebook_id
+        const data = {
+          notebookId: this.notebookId
+        }
+        location.href = 'https://woshiange.github.io/viz/dashboard?' + new URLSearchParams(data)
+      }
     }
   },
     })

@@ -105,6 +105,7 @@ export default {
       grid: null,
       fileContent: null,
       cells: [],
+      cellsEdit: [],
       trash: [],
       drawerTrash: false,
       sizeObserver: null,
@@ -170,6 +171,29 @@ export default {
         this.grid.makeWidget(`#${cellResult.id}`)
       })
     },
+    addCellEdit(cellArg, index) {
+      var cellEditIndex = this.cellsEdit.findIndex((cell => cell.id == index))
+      if (cellEditIndex < 0) {
+        // add cell to trash
+        return
+      }
+      var cellEdit = this.cellsEdit[cellEditIndex]
+      var layout = {
+        x: cellEdit['gs-x'],
+        y: cellEdit['gs-y'],
+        width: cellEdit['gs-w'],
+        height: cellEdit['gs-h']
+      }
+      const cellResult = {
+        id: index,
+        layout,
+        iframeContent: cellArg.iframeContent
+      }
+      this.cells.push(cellResult)
+      this.$nextTick(() => {
+        this.grid.makeWidget(`#${cellResult.id}`)
+      })
+    },
     runXpath(path, doc) {
       return doc.evaluate(path, doc, null, XPathResult.ORDERED_NODE_ITERATOR_TYPE, null)
     },
@@ -195,11 +219,38 @@ export default {
       })
     },
     async update() {
-      this.fileContent = this.$route.params.fileContent
-      const dom = new DOMParser().parseFromString(this.fileContent, 'text/html')
-      new Notebook(dom).cells.forEach(cell => {
-        this.addCell(cell)
+      var notebookId = this.$route.query.notebookId
+      if (typeof notebookId !== 'undefined') {
+        this.updateFromEdit(notebookId)
+      } else {
+        this.fileContent = this.$route.params.fileContent
+        const dom = new DOMParser().parseFromString(this.fileContent, 'text/html')
+        new Notebook(dom).cells.forEach(cell => {
+          this.addCell(cell)
+        })
+      }
+    },
+    async updateFromEdit(notebookId) {
+      let url = 'https://asia-southeast2-dataviz-374817.cloudfunctions.net/get_notebook'
+      let data = { 'notebook_id': notebookId }
+      let res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
       })
+      if (res.ok) {
+        let ret = await res.json()
+        this.fileContent = ret.notebookHtml
+        this.cellsEdit = JSON.parse(ret.cells)
+        const dom = new DOMParser().parseFromString(this.fileContent, 'text/html')
+        var count = 0
+        new Notebook(dom).cells.forEach(cell => {
+          this.addCellEdit(cell, 'cell' + count)
+          count += 1
+        })
+      }
     },
     onResize () {
       if(!(this.edit)) {
@@ -209,7 +260,9 @@ export default {
         return
       }
       const firstCell = this.grid.engine.nodes[0]
-      this.cellWidthUnitPx = firstCell.el.offsetWidth/firstCell.w
+      if (typeof firstCell !== 'undefined') {
+        this.cellWidthUnitPx = firstCell.el.offsetWidth/firstCell.w
+      }
     },
     setGridCss () {
       this.gridStyles = {
@@ -230,6 +283,7 @@ export default {
     }
   },
   mounted() {
+    console.log('ssssserbe')
     this.grid = GridStack.init({
       acceptWidgets: true,
       float: false,

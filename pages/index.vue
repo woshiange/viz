@@ -76,7 +76,7 @@ export default {
     async convertIpynbTokHtml (notebookIpynb) {
       this.loaderMessage = 'Converting Ipynb to Html...'
       const response = await this.$axios.$post(
-        'https://asia-southeast2-wyzauto.cloudfunctions.net/etl-convert_notebook_to_html',
+        'https://asia-southeast2-dataviz-374817.cloudfunctions.net/ipynb_to_html',
         { notebookSource: notebookIpynb }
       )
       return this.fileContent = response
