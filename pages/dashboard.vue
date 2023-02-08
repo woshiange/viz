@@ -1,19 +1,4 @@
-<template>
-  <v-app>
-    <v-system-bar
-      app
-      height="50"
-      color="blue"
-    >
-      <v-spacer></v-spacer>
-      <v-icon
-        color="white"
-      >
-        mdi-pencil
-      </v-icon>
-      <span style="color:white; font-weight: bold;">
-        You're editing this presentation.
-      </span>
+</span>
       <download
         :cells="cells"
         :fileContent="fileContent"
@@ -74,15 +59,19 @@
     </v-navigation-drawer>
 
     <v-main class="ma-0 pa-4">
-        <section class="grid-stack" ref="dashboard" :style="gridStyles">
-          <cell
-            v-for="cell in cells"
-            :cell="cell"
-            :key="cell.id"
-            :edit="edit"
-            @delete-cell="deleteCell"
-          />
-        </section>
+      <div v-if="loading" class="d-flex justify-center">
+        <v-progress-circular indeterminate></v-progress-circular>
+        <span>  Loading...</span>
+      </div>
+      <section class="grid-stack" ref="dashboard" :style="gridStyles" v-else>
+        <cell
+          v-for="cell in cells"
+          :cell="cell"
+          :key="cell.id"
+          :edit="edit"
+          @delete-cell="deleteCell"
+        />
+      </section>
     </v-main>
 
   </v-app>
@@ -110,7 +99,8 @@ export default {
       drawerTrash: false,
       sizeObserver: null,
       cellWidthUnitPx: null,
-      gridStyles: {}
+      gridStyles: {},
+      loading: false
     }
   },
   watch: {
@@ -223,11 +213,13 @@ export default {
       if (typeof notebookId !== 'undefined') {
         this.updateFromEdit(notebookId)
       } else {
+        this.loading = true
         this.fileContent = this.$route.params.fileContent
         const dom = new DOMParser().parseFromString(this.fileContent, 'text/html')
         new Notebook(dom).cells.forEach(cell => {
           this.addCell(cell)
         })
+        this.loading = false
       }
     },
     async updateFromEdit(notebookId) {
