@@ -219,11 +219,8 @@ iframe {
 
             <v-main>
                 <v-container>
-      <div v-if="beingEdited" class="d-flex justify-center">
-        <v-progress-circular indeterminate></v-progress-circular>
-        <span>  Loading...</span>
-      </div>
-      <div id="dashboard" class="h-screen w-screen flex flex-col items-center bg-gray-100 p-10" v-else>
+
+      <div id="dashboard" class="h-screen w-screen flex flex-col items-center bg-gray-100 p-10">
         <section class="grid-stack h-full w-full">
           <div
             v-for="cell in cellsGridstack"
@@ -267,8 +264,7 @@ iframe {
           notebookId: null,
           trash: [],
           drawerTrash: false,
-          dataBeforeEdit: { cells: [], trash: [] },
-          beingEdited: false
+          dataBeforeEdit: { cells: [], trash: [] }
         },
         computed: {
           cellsGridstack() {
@@ -316,7 +312,6 @@ iframe {
       }
     },
     edit() {
-      this.beingEdited = true
       this.sendNotebook()
     },
     async sendNotebook() {
