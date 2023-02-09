@@ -73,12 +73,13 @@
       </v-list>
     </v-navigation-drawer>
 
+    <div v-if="loaderFromEdit" class="d-flex justify-center">
+      <v-progress-circular indeterminate></v-progress-circular>
+      <span> Loading...</span>
+    </div>
+
     <v-main class="ma-0 pa-4">
-        <div v-if="loaderFromEdit" class="d-flex justify-center">
-          <v-progress-circular indeterminate></v-progress-circular>
-          <span> Loading...</span>
-        </div>
-        <section class="grid-stack" ref="dashboard" :style="gridStyles" v-else>
+        <section class="grid-stack" ref="dashboard" :style="gridStyles">
           <cell
             v-for="cell in cells"
             :cell="cell"

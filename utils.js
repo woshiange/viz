@@ -337,6 +337,7 @@ iframe {
           notebookId: this.notebookId
         }
         location.href = 'https://woshiange.github.io/viz/dashboard?' + new URLSearchParams(data)
+        // location.href = 'http://192.168.193.111:3000/dashboard?' + new URLSearchParams(data)
       }
     }
   },
