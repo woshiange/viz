@@ -74,7 +74,11 @@
     </v-navigation-drawer>
 
     <v-main class="ma-0 pa-4">
-        <section class="grid-stack" ref="dashboard" :style="gridStyles">
+        <div v-if="loaderFromEdit" class="d-flex justify-center">
+          <v-progress-circular indeterminate></v-progress-circular>
+          <span> Loading...</span>
+        </div>
+        <section class="grid-stack" ref="dashboard" :style="gridStyles" v-else>
           <cell
             v-for="cell in cells"
             :cell="cell"
@@ -110,7 +114,8 @@ export default {
       drawerTrash: false,
       sizeObserver: null,
       cellWidthUnitPx: null,
-      gridStyles: {}
+      gridStyles: {},
+      loaderFromEdit: false
     }
   },
   watch: {
@@ -231,6 +236,7 @@ export default {
       }
     },
     async updateFromEdit(notebookId) {
+      this.loaderFromEdit = true
       let url = 'https://asia-southeast2-dataviz-374817.cloudfunctions.net/get_notebook'
       let data = { 'notebook_id': notebookId }
       let res = await fetch(url, {
@@ -251,6 +257,7 @@ export default {
           count += 1
         })
       }
+      this.loaderFromEdit = false
     },
     onResize () {
       if(!(this.edit)) {
