@@ -17,7 +17,6 @@
       <download
         :cells="cells"
         :fileContent="fileContent"
-        :trash="trash"
         class="ml-2"
       />
       <v-spacer></v-spacer>
@@ -140,7 +139,12 @@ export default {
   },
   methods: {
     addCell(cell) {
-      let index = this.cells.length
+      var index
+      if('id' in cell) {
+        index = parseInt(cell.id.match(/\d/g).join(""))
+      } else {
+        index = this.cells.length
+      }
       const lastCellLayout = index == 0 ?
         {
           x: 0,
@@ -180,7 +184,8 @@ export default {
     addCellEdit(cellArg, index) {
       var cellEditIndex = this.cellsEdit.findIndex((cell => cell.id == index))
       if (cellEditIndex < 0) {
-        // add cell to trash
+        // cellArg belongs to the trash
+        this.trash.push(cellArg)
         return
       }
       var cellEdit = this.cellsEdit[cellEditIndex]
@@ -214,12 +219,17 @@ export default {
       this.trash.push(cell)
     },
     restoreCell (cell) {
-      cell.layout.x = 0
-      cell.layout.y = this.gridLastRow
-      this.cells.push(cell)
-      this.$nextTick(() => {
-        this.grid.makeWidget(`#${cell.id}`)
-      })
+      if('layout' in cell) {
+        cell.layout.x = 0
+        cell.layout.y = this.gridLastRow
+        this.cells.push(cell)
+        this.$nextTick(() => {
+          this.grid.makeWidget(`#${cell.id}`)
+        })
+      } else {
+        // from edit
+        this.addCell(cell)
+      }
       this.trash = this.trash.filter(x => {
         return x.id != cell.id
       })
@@ -291,7 +301,6 @@ export default {
     }
   },
   mounted() {
-    console.log('ssssserbe')
     this.grid = GridStack.init({
       acceptWidgets: true,
       float: false,

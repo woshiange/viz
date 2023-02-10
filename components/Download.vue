@@ -18,10 +18,6 @@ export default {
       type: Array,
       default: []
     },
-    trash: {
-      type: Array,
-      default: []
-    },
     fileContent: {
       type: String,
       default: ''
