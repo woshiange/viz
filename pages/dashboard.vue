@@ -50,6 +50,7 @@
 
     <v-navigation-drawer
       v-model="drawerTrash"
+      disable-resize-watcher
       :width="500"
       app
       clipped
