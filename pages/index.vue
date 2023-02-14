@@ -74,7 +74,6 @@ export default {
       this.isDragging = false;
     },
     async convertIpynbTokHtml (notebookIpynb) {
-      this.loaderMessage = 'Converting Ipynb to Html...'
       const response = await this.$axios.$post(
         'https://asia-southeast2-dataviz-374817.cloudfunctions.net/ipynb_to_html',
         { notebookSource: notebookIpynb }
@@ -87,8 +86,10 @@ export default {
       const reader = new FileReader()
       reader.onload = () => {
         if(this.fileExtension === 'ipynb') {
+          this.loaderMessage = 'Converting Ipynb to Html...'
           this.convertIpynbTokHtml(reader.result)
         } else {
+          this.loaderMessage = '   Loading...'
           this.fileContent = reader.result
         }
       }

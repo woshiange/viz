@@ -290,6 +290,8 @@ iframe {
             minRow: 1,
             margin: '5px',
           })
+          this.grid.enableMove(false)
+          this.grid.enableResize(false)
           this.cellsStart = JSON.parse(JSON.stringify(this.cells))
           this.populate()
         },
