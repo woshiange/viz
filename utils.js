@@ -39,6 +39,15 @@ function extractMarkdown (markdownEl) {
   return new DOMParser().parseFromString(markdownEl.outerHTML, 'text/html')
 }
 
+function extractRenderedHTML (renderedHTMLEl, template) {
+  var template = template.cloneNode(true)
+  const html = template.getElementsByTagName("html")[0]
+  const body = document.createElement("body")
+  body.appendChild(renderedHTMLEl)
+  html.appendChild(body)
+  return template
+}
+
 function extractDefault (defaultEl) {
   var script = defaultEl.createElement('script')
   script.src = 'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js'
@@ -50,12 +59,15 @@ function extractDefault (defaultEl) {
 }
 
 class Cell {
-  constructor(dom, id) {
+  constructor(dom, id, styles, notebookTemplate) {
     this.id = 'cell' + String(id)
     this.dom = dom
+    this.notebookStyles = styles
+    this.notebookTemplate = notebookTemplate
     this.echartsEl = getElementByXpath("//script[contains(text(),'function(echarts)')]/..", this.dom)
     this.markdownEl = getElementByXpath("//div[contains(@class, 'jp-MarkdownOutput')]", this.dom)
     this.plotlyEl = getElementByXpath("//div[contains(@class, 'plotly-graph-div')]/../../../..", this.dom)
+    this.renderedHTML = getElementByXpath("//div[contains(@class, 'jp-RenderedHTML')]", this.dom)
   }
 
   get type() {
@@ -70,9 +82,15 @@ class Cell {
       case this.plotlyEl !== null:
         result = 'plotly'
         break
+      case this.renderedHTML !== null:
+        result = 'renderedHTML'
+        break
       default:
         result = 'default'
         break
+    }
+    if (result !== 'renderedHTML') {
+      this.notebookStyles = null
     }
     return result
   }
@@ -88,6 +106,9 @@ class Cell {
         break
       case 'plotly':
         result = extractPlotly(this.plotlyEl)
+        break
+      case 'renderedHTML':
+        result = extractRenderedHTML(this.renderedHTML, this.notebookTemplate)
         break
       default:
         result = extractDefault(this.dom)
@@ -108,6 +129,11 @@ class Cell {
 class Notebook {
   constructor(dom) {
     this.dom = dom
+    this.styles = this.setStyles()
+    this.template = this.setTemplate()
+    console.log('abc')
+    console.log(this.template)
+    console.log('abc')
   }
 
   get cells() {
@@ -115,9 +141,23 @@ class Notebook {
     const cellsDom = this.dom.querySelectorAll('.jp-Cell');
     for(var i = 0; i < cellsDom.length; i++) {
       var cellDom = new DOMParser().parseFromString(cellsDom[i].outerHTML, 'text/html')
-      result.push(new Cell(cellDom, i))
+      result.push(new Cell(cellDom, i, this.styles, this.template))
     }
     return result
+  }
+
+  setStyles() {
+    var result = this.dom.evaluate('//head/style', this.dom, null, XPathResult.ANY_TYPE, null)
+    var node, nodes = []
+    while (node = result.iterateNext())
+      nodes.push(node);
+    return nodes
+  }
+
+  setTemplate() {
+    var template = this.dom.cloneNode(true)
+    template.body.remove()
+    return template
   }
 }
 
