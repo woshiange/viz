@@ -44,9 +44,6 @@ export default {
   },
   computed: {
     gridStackAttributes() {
-      console.log('aaaa')
-      console.log(this.cell)
-      console.log('bbbb')
       return {
         id: this.cell.id,
         "gs-id": this.cell.id,

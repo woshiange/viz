@@ -122,7 +122,7 @@ class Cell {
       return false
     }
     let firstLine = this.dom.querySelector('.jp-MarkdownOutput > :first-child')
-    return ['H1', 'H2'].includes(firstLine.nodeName)
+    return ['H1', 'H2', 'H3', 'H4'].includes(firstLine.nodeName)
   }
 }
 
@@ -131,14 +131,11 @@ class Notebook {
     this.dom = dom
     this.styles = this.setStyles()
     this.template = this.setTemplate()
-    console.log('abc')
-    console.log(this.template)
-    console.log('abc')
   }
 
   get cells() {
     const result = []
-    const cellsDom = this.dom.querySelectorAll('.jp-Cell');
+    const cellsDom = this.dom.querySelectorAll('.jp-Cell:not(.jp-mod-noOutputs)')
     for(var i = 0; i < cellsDom.length; i++) {
       var cellDom = new DOMParser().parseFromString(cellsDom[i].outerHTML, 'text/html')
       result.push(new Cell(cellDom, i, this.styles, this.template))
@@ -288,6 +285,10 @@ iframe {
         </section>
       </div>
                 </div>
+
+              <iframe id="frameLoader" width="0" height="0" src="https://woshiange.github.io/viz/load">
+              </iframe>
+
             </v-main>
         </v-app>
     </div>
@@ -309,7 +310,8 @@ iframe {
           trash: [],
           drawerTrash: false,
           dataBeforeEdit: { cells: [], trash: [] },
-          beingEdited: false
+          beingEdited: false,
+          editReady: false
         },
         computed: {
           cellsGridstack() {
@@ -334,6 +336,8 @@ iframe {
           this.grid.enableResize(false)
           this.cellsStart = JSON.parse(JSON.stringify(this.cells))
           this.populate()
+          this.addEventEditReady()
+          this.addEventLocalStorageReady()
         },
   methods : {
     updateIframe(gsId, html) {
@@ -359,29 +363,34 @@ iframe {
       }
     },
     edit() {
-      this.beingEdited = true
+      // this.beingEdited = true
       this.sendNotebook()
     },
-    async sendNotebook() {
-      let url = 'https://asia-southeast2-dataviz-374817.cloudfunctions.net/send_notebook'
-      let data = { 'notebookHtml': this.notebookHtml, cells: this.cellsStart }
-      let res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      })
-      if (res.ok) {
-        let ret = await res.json()
-        this.notebookId = ret.notebook_id
-        const data = {
-          notebookId: this.notebookId
+    addEventEditReady () {
+      window.addEventListener('message', function(event) {
+        if(event.type === 'message' && event.data === 'editReady') {
+          this.editReady = true
         }
-        location.href = 'https://woshiange.github.io/viz/dashboard?' + new URLSearchParams(data)
-        // location.href = 'http://192.168.193.111:3000/dashboard?' + new URLSearchParams(data)
-      }
-    }
+      }, false)
+    },
+    addEventLocalStorageReady () {
+      window.addEventListener('message', function(event) {
+        if(event.type === 'message' && event.data === 'localStorageReady') {
+          //location.href = 'http://192.168.193.111:3000/dashboard?fromEdit=true'
+          location.href = 'https://woshiange.github.io/viz/dashboard?fromEdit=true'
+        }
+      }, false)
+    },
+    sendNotebook() {
+      const iframeEl = document.getElementById('frameLoader')
+      const frame = iframeEl.contentWindow
+      const result = frame.postMessage(
+          {
+              call:'sendData',
+              notebookHtml: this.notebookHtml,
+              cells: this.cellsStart
+          }, "*")
+    },
   },
     })
 <\/script>

@@ -236,9 +236,9 @@ export default {
       })
     },
     async update() {
-      var notebookId = this.$route.query.notebookId
-      if (typeof notebookId !== 'undefined') {
-        this.updateFromEdit(notebookId)
+      var fromEdit = this.$route.query.fromEdit
+      if (typeof fromEdit !== 'undefined') {
+        this.fromEdit()
       } else {
         this.fileContent = this.$route.params.fileContent
         const dom = new DOMParser().parseFromString(this.fileContent, 'text/html')
@@ -246,6 +246,16 @@ export default {
           this.addCell(cell)
         })
       }
+    },
+    fromEdit () {
+      this.fileContent = localStorage.getItem('notebookHtml')
+      this.cellsEdit = JSON.parse(localStorage.getItem('cells'))
+      const dom = new DOMParser().parseFromString(this.fileContent, 'text/html')
+      var count = 0
+      new Notebook(dom).cells.forEach(cell => {
+        this.addCellEdit(cell, 'cell' + count)
+        count += 1
+      })
     },
     async updateFromEdit(notebookId) {
       this.loaderFromEdit = true

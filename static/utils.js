@@ -1,4 +1,3 @@
-
 function getElementByXpath(path, doc) {
   return doc.evaluate(path, doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
 }
@@ -123,7 +122,7 @@ class Cell {
       return false
     }
     let firstLine = this.dom.querySelector('.jp-MarkdownOutput > :first-child')
-    return ['H1', 'H2'].includes(firstLine.nodeName)
+    return ['H1', 'H2', 'H3', 'H4'].includes(firstLine.nodeName)
   }
 }
 
@@ -132,14 +131,11 @@ class Notebook {
     this.dom = dom
     this.styles = this.setStyles()
     this.template = this.setTemplate()
-    console.log('abc')
-    console.log(this.template)
-    console.log('abc')
   }
 
   get cells() {
     const result = []
-    const cellsDom = this.dom.querySelectorAll('.jp-Cell');
+    const cellsDom = this.dom.querySelectorAll('.jp-Cell:not(.jp-mod-noOutputs)')
     for(var i = 0; i < cellsDom.length; i++) {
       var cellDom = new DOMParser().parseFromString(cellsDom[i].outerHTML, 'text/html')
       result.push(new Cell(cellDom, i, this.styles, this.template))
