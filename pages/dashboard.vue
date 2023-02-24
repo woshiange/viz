@@ -6,24 +6,46 @@
       color="blue"
     >
       <v-spacer></v-spacer>
-      <v-icon
-        color="white"
-      >
-        mdi-pencil
-      </v-icon>
-      <span style="color:white; font-weight: bold;">
-        You're editing this presentation.
+      <span v-if="edit" style="color:white; font-weight: bold;">
+        <v-icon
+          color="white"
+        >
+          mdi-pencil
+        </v-icon>
+        <span style="color:white; font-weight: bold;">
+          You're editing this presentation.
+        </span>
+        <v-btn
+          small
+          color="grey lighten-5"
+          elevation="0"
+          class="blue--text ml-2"
+          @click="edit = !edit"
+        >
+          Done
+        </v-btn>
       </span>
-      <download
-        :cells="cells"
-        :fileContent="fileContent"
-        class="ml-2"
-      />
+      <span v-else>
+        <v-btn
+          small
+          color="grey lighten-5"
+          elevation="0"
+          class="blue--text ml-2"
+          @click="edit = !edit"
+        >
+          Edit
+        </v-btn>
+        <download
+          :cells="cells"
+          :fileContent="fileContent"
+          class="ml-2"
+        />
+      </span>
       <v-spacer></v-spacer>
     </v-system-bar>
 
     <v-app-bar
-      v-if="trash.length > 0"
+      v-if="trash.length > 0 && edit"
       class="d-flex justify-end"
       app
       fixed
@@ -124,9 +146,11 @@ export default {
       if(this.edit) {
         this.grid.enableMove(true)
         this.grid.enableResize(true)
+        this.setGridCss()
       } else {
         this.grid.enableMove(false)
         this.grid.enableResize(false)
+        this.removeGridCss()
       }
     },
     trash () {
@@ -257,30 +281,6 @@ export default {
         count += 1
       })
     },
-    async updateFromEdit(notebookId) {
-      this.loaderFromEdit = true
-      let url = 'https://asia-southeast2-dataviz-374817.cloudfunctions.net/get_notebook'
-      let data = { 'notebook_id': notebookId }
-      let res = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      })
-      if (res.ok) {
-        let ret = await res.json()
-        this.fileContent = ret.notebookHtml
-        this.cellsEdit = JSON.parse(ret.cells)
-        const dom = new DOMParser().parseFromString(this.fileContent, 'text/html')
-        var count = 0
-        new Notebook(dom).cells.forEach(cell => {
-          this.addCellEdit(cell, 'cell' + count)
-          count += 1
-        })
-      }
-      this.loaderFromEdit = false
-    },
     onResize () {
       if(!(this.edit)) {
         return
@@ -292,6 +292,9 @@ export default {
       if (typeof firstCell !== 'undefined') {
         this.cellWidthUnitPx = firstCell.el.offsetWidth/firstCell.w
       }
+    },
+    removeGridCss () {
+      this.gridStyles = {}
     },
     setGridCss () {
       this.gridStyles = {
